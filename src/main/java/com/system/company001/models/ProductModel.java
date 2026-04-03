@@ -1,5 +1,6 @@
 package com.system.company001.models;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -13,6 +14,8 @@ import org.springframework.hateoas.RepresentationModel;
 @Entity
 @Table(name = "TB_PRODUCTS")
 public class ProductModel extends RepresentationModel<ProductModel> implements Serializable {
+
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	@Id
