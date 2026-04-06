@@ -27,7 +27,7 @@ public class ProductController {
 
 	@GetMapping("/products")
 	public ResponseEntity<List<ProductModel>> getAllProducts(){
-		List<ProductModel> productsList = productRepository.findAll();
+		List<ProductModel> productsList = productRepository.findAllByOrderByNameAsc();
 		productsList.forEach(product ->
 				product.add(linkTo(methodOn(ProductController.class).getOneProduct(product.getIdProduct())).withSelfRel())
 		);
