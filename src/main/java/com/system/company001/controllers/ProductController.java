@@ -5,8 +5,12 @@ import com.system.company001.models.ProductModel;
 import com.system.company001.repositories.ProductRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,25 +26,31 @@ public class ProductController {
 
 	final ProductRepository productRepository;
 
+	@Autowired
+	private PagedResourcesAssembler<ProductModel> pagedResourcesAssembler;
+
 	public ProductController(ProductRepository productRepository) {
 		this.productRepository = productRepository;
 	}
 
 	@GetMapping("/products")
-	public ResponseEntity<Page<ProductModel>> getAllProducts(Pageable pageable) {
+	public ResponseEntity<PagedModel<EntityModel<ProductModel>>> getAllProducts(
+			Pageable pageable, PagedResourcesAssembler<ProductModel> assembler
+	) {
 		Page<ProductModel> productsPage = productRepository.findAllByOrderByNameAsc(pageable);
-		productsPage.forEach(product ->
-				product.add(linkTo(methodOn(ProductController.class)
-						.getOneProduct(product.getIdProduct())).withSelfRel())
-		);
-		return ResponseEntity.ok(productsPage);
+		PagedModel<EntityModel<ProductModel>> pagedModel = assembler.toModel(productsPage, product -> {
+			return EntityModel.of(product,
+					linkTo(methodOn(ProductController.class).getOneProduct(product.getIdProduct())).withSelfRel());
+		});
+		return ResponseEntity.ok(pagedModel);
 	}
 
 	@GetMapping("/products/{id}")
 	public ResponseEntity<Object> getOneProduct(@PathVariable(value="id") UUID id){
 		return productRepository.findById(id)
 				.map(product -> {
-					product.add(linkTo(methodOn(ProductController.class).getAllProducts(null))
+					product.add(linkTo(methodOn(ProductController.class).getAllProducts(
+							null, pagedResourcesAssembler))
 							.withRel("Products List"));
 					return ResponseEntity.status(HttpStatus.OK).body((Object) product);
 				})
@@ -64,8 +74,10 @@ public class ProductController {
 	}
 	
 	@PutMapping("/products/{id}")
-	public ResponseEntity<Object> updateProduct(@PathVariable(value="id") UUID id,
-												@RequestBody @Valid ProductRecordDto productRecordDto) {
+	public ResponseEntity<Object> updateProduct(
+			@PathVariable(value="id") UUID id,
+			@RequestBody @Valid ProductRecordDto productRecordDto
+	) {
 		return productRepository.findById(id)
 				.map(product -> {
 					BeanUtils.copyProperties(productRecordDto, product);

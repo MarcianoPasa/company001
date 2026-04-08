@@ -1,14 +1,12 @@
 package com.system.company001.models;
 
+import jakarta.persistence.*;
+import org.springframework.hateoas.RepresentationModel;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.UUID;
-
-import jakarta.persistence.*;
-
-
-import org.springframework.hateoas.RepresentationModel;
 
 
 @Entity
