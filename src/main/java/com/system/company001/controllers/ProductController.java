@@ -5,11 +5,12 @@ import com.system.company001.models.ProductModel;
 import com.system.company001.repositories.ProductRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -26,19 +27,21 @@ public class ProductController {
 	}
 
 	@GetMapping("/products")
-	public ResponseEntity<List<ProductModel>> getAllProducts(){
-		List<ProductModel> productsList = productRepository.findAllByOrderByNameAsc();
-		productsList.forEach(product ->
-				product.add(linkTo(methodOn(ProductController.class).getOneProduct(product.getIdProduct())).withSelfRel())
+	public ResponseEntity<Page<ProductModel>> getAllProducts(Pageable pageable) {
+		Page<ProductModel> productsPage = productRepository.findAllByOrderByNameAsc(pageable);
+		productsPage.forEach(product ->
+				product.add(linkTo(methodOn(ProductController.class)
+						.getOneProduct(product.getIdProduct())).withSelfRel())
 		);
-		return ResponseEntity.status(HttpStatus.OK).body(productsList);
+		return ResponseEntity.ok(productsPage);
 	}
 
 	@GetMapping("/products/{id}")
 	public ResponseEntity<Object> getOneProduct(@PathVariable(value="id") UUID id){
 		return productRepository.findById(id)
 				.map(product -> {
-					product.add(linkTo(methodOn(ProductController.class).getAllProducts()).withRel("Products List"));
+					product.add(linkTo(methodOn(ProductController.class).getAllProducts(null))
+							.withRel("Products List"));
 					return ResponseEntity.status(HttpStatus.OK).body((Object) product);
 				})
 				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found."));
@@ -62,7 +65,7 @@ public class ProductController {
 	
 	@PutMapping("/products/{id}")
 	public ResponseEntity<Object> updateProduct(@PathVariable(value="id") UUID id,
-													  @RequestBody @Valid ProductRecordDto productRecordDto) {
+												@RequestBody @Valid ProductRecordDto productRecordDto) {
 		return productRepository.findById(id)
 				.map(product -> {
 					BeanUtils.copyProperties(productRecordDto, product);
