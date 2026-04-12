@@ -1,17 +1,11 @@
-pipeline {
-    agent any
+stage('Build Docker') {
+    steps {
+        sh 'docker build -t backend-app .'
+    }
+}
 
-    stages {
-        stage('Build') {
-            steps {
-                sh 'mvn clean install'
-            }
-        }
-
-        stage('Run') {
-            steps {
-                sh 'java -jar target/app.jar'
-            }
-        }
+stage('Run Container') {
+    steps {
+        sh 'docker run -d -p 3000:3000 backend-app'
     }
 }
