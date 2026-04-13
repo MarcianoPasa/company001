@@ -21,7 +21,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost")
 public class CustomerController {
 
 	final CustomerRepository customerRepository;
@@ -72,7 +72,7 @@ public class CustomerController {
 				})
 				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found."));
 	}
-	
+
 	@PutMapping("/customers/{id}")
 	public ResponseEntity<Object> updateCustomer(
 			@PathVariable(value="id") UUID id,
