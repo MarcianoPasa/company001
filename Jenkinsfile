@@ -43,9 +43,9 @@ pipeline {
             steps {
                 script {
                     if (isUnix()) {
-                        sh "docker run -d --name ${CONTAINER_NAME} -p ${PORT}:${PORT} ${IMAGE_NAME}"
+                        sh "docker run -d --name ${CONTAINER_NAME} -p 8081:8080 ${IMAGE_NAME}"
                     } else {
-                        bat "docker run -d --name ${CONTAINER_NAME} -p ${PORT}:${PORT} ${IMAGE_NAME}"
+                        bat "docker run -d --name ${CONTAINER_NAME} -p 8081:8080 ${IMAGE_NAME}"
                     }
                 }
             }

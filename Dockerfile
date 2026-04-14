@@ -1,12 +1,14 @@
-FROM node:18
-
+# Estágio de Build
+FROM maven:3.9.6-eclipse-temurin-21 AS build 
+# Nota: Como o Java 25 é muito novo, usamos a imagem do 21 ou 
+# uma imagem personalizada com o JDK 25.
 WORKDIR /app
-
-COPY package*.json ./
-RUN npm install
-
 COPY . .
+RUN mvn clean package -DskipTests
 
-EXPOSE 3000
-
-CMD ["npm", "start"]
+# Estágio de Execução
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
