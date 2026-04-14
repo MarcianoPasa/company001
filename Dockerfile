@@ -1,26 +1,24 @@
 # Estágio 1: Compilação (Build)
-# Usamos a imagem do JDK 25 para suportar a versão do seu pom.xml
-FROM openjdk:25-slim AS build
+FROM container-registry.oracle.com/java/jdk:25 AS build
 WORKDIR /app
 
-# Copia todos os arquivos do projeto para dentro do container
+# Copia os arquivos do projeto
 COPY . .
 
-# Dá permissão de execução para o wrapper do Maven
+# Garante permissão para o Maven Wrapper
+# No Windows o comando chmod pode falhar no Docker, mas o RUN fará o trabalho no Linux do container
 RUN chmod +x mvnw
 
-# Executa o build usando o wrapper (ele vai baixar o Maven sozinho)
+# Executa o build (o ./mvnw vai baixar o Maven necessário)
 RUN ./mvnw clean package -DskipTests
 
 # Estágio 2: Execução (Runtime)
-FROM openjdk:25-slim
+FROM container-registry.oracle.com/java/jdk:25
 WORKDIR /app
 
-# Copia apenas o arquivo .jar gerado no estágio anterior
+# Copia o JAR gerado
 COPY --from=build /app/target/*.jar app.jar
 
-# Porta padrão do Spring Boot
 EXPOSE 8080
 
-# Comando para iniciar a aplicação
 ENTRYPOINT ["java", "-jar", "app.jar"]
