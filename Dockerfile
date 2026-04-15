@@ -1,24 +1,24 @@
-# Estágio 1: Compilação (Build)
-FROM container-registry.oracle.com/java/jdk:25 AS build
+# Estágio 1: Build
+FROM bellsoft/liberica-openjdk-debian:25 AS build
 WORKDIR /app
 
-# Copia os arquivos do projeto
+# Instala o Maven para garantir a compilação
+RUN apt-get update && apt-get install -y maven
+
+# Copia o código fonte
 COPY . .
 
-# Garante permissão para o Maven Wrapper
-# No Windows o comando chmod pode falhar no Docker, mas o RUN fará o trabalho no Linux do container
-RUN chmod +x mvnw
+# Gera o arquivo .jar ignorando os testes (para agilizar o deploy no Jenkins)
+RUN mvn clean package -DskipTests
 
-# Executa o build (o ./mvnw vai baixar o Maven necessário)
-RUN ./mvnw clean package -DskipTests
-
-# Estágio 2: Execução (Runtime)
-FROM container-registry.oracle.com/java/jdk:25
+# Estágio 2: Runtime
+FROM bellsoft/liberica-openjdk-debian:25
 WORKDIR /app
 
-# Copia o JAR gerado
+# Copia o jar gerado no estágio anterior
 COPY --from=build /app/target/*.jar app.jar
 
+# Define variáveis de ambiente para o Spring (ou você pode passar no comando de run)
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
