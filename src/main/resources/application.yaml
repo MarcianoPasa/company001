@@ -1,5 +1,12 @@
+server:
+  port: 8081
+  error:
+    include-message: always
+    include-stacktrace: always
+
 spring:
   datasource:
+    # Correto para o Docker acessar o banco no seu Windows
     url: jdbc:postgresql://host.docker.internal:5432/company001
     username: postgres
     password: 123
