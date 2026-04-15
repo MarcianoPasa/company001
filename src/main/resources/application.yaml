@@ -1,8 +1,5 @@
 server:
   port: 8081
-  error:
-    include-message: always
-    include-stacktrace: always
 
 spring:
   datasource:
@@ -20,3 +17,7 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+  web:
+    error:
+      include-message: always
+      include-stacktrace: always
