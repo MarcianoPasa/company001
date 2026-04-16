@@ -6,6 +6,7 @@ import com.system.company001.repositories.CustomerRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -28,7 +29,7 @@ public class CustomerController {
 
 	@Autowired
 	public CustomerController(CustomerRepository customerRepository,
-	                          PagedResourcesAssembler<CustomerModel> pagedResourcesAssembler) {
+	                          @Lazy PagedResourcesAssembler<CustomerModel> pagedResourcesAssembler) {
 		this.customerRepository = customerRepository;
 		this.pagedResourcesAssembler = pagedResourcesAssembler;
 	}

@@ -6,6 +6,7 @@ import com.system.company001.repositories.ProductRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -33,7 +34,7 @@ public class ProductController {
 
 	@Autowired
 	public ProductController(ProductRepository productRepository,
-	                         PagedResourcesAssembler<ProductModel> pagedResourcesAssembler) {
+	                         @Lazy PagedResourcesAssembler<ProductModel> pagedResourcesAssembler) {
 		this.productRepository = productRepository;
 		this.pagedResourcesAssembler = pagedResourcesAssembler;
 	}
