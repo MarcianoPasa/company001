@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/MarcianoPasa/company001.git'
+                checkout scm
             }
         }
 

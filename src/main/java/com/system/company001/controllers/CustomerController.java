@@ -25,7 +25,6 @@ public class CustomerController {
 
 	final CustomerRepository customerRepository;
 
-	@Autowired
 	private PagedResourcesAssembler<CustomerModel> pagedResourcesAssembler;
 
 	public CustomerController(CustomerRepository customerRepository) {

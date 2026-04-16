@@ -25,7 +25,6 @@ public class ProductController {
 
 	final ProductRepository productRepository;
 
-	@Autowired
 	private PagedResourcesAssembler<ProductModel> pagedResourcesAssembler;
 
 	public ProductController(ProductRepository productRepository) {
