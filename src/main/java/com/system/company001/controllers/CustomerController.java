@@ -5,8 +5,6 @@ import com.system.company001.models.CustomerModel;
 import com.system.company001.repositories.CustomerRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -35,12 +33,18 @@ public class CustomerController {
 	public ResponseEntity<PagedModel<EntityModel<CustomerModel>>> getAllCustomers(
 			Pageable pageable, PagedResourcesAssembler<CustomerModel> assembler
 	) {
-		Page<CustomerModel> customersPage = customerRepository.findAllByOrderByBusinessNameAsc(pageable);
-		PagedModel<EntityModel<CustomerModel>> pagedModel = assembler.toModel(customersPage, customer -> {
-			return EntityModel.of(customer,
-					linkTo(methodOn(CustomerController.class).getOneCustomer(customer.getIdCustomer())).withSelfRel());
-		});
-		return ResponseEntity.ok(pagedModel);
+//		Page<CustomerModel> customersPage = customerRepository.findAllByOrderByBusinessNameAsc(pageable);
+//		PagedModel<EntityModel<CustomerModel>> pagedModel =
+//				assembler.toModel(customersPage, CustomerController::toModel);
+		return ResponseEntity.ok(assembler.toModel(
+				customerRepository.findAllByOrderByBusinessNameAsc(pageable),
+				CustomerController::toModel)
+		);
+	}
+
+	private static EntityModel<CustomerModel> toModel(CustomerModel customer) {
+		return EntityModel.of(customer,
+				linkTo(methodOn(CustomerController.class).getOneCustomer(customer.getIdCustomer())).withSelfRel());
 	}
 
 	@GetMapping("/customers/{id}")

@@ -4,8 +4,8 @@ import com.system.company001.dtos.ProductRecordDto;
 import com.system.company001.models.ProductModel;
 import com.system.company001.repositories.ProductRepository;
 import jakarta.validation.Valid;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -25,7 +25,7 @@ public class ProductController {
 
 	final ProductRepository productRepository;
 
-	private PagedResourcesAssembler<ProductModel> pagedResourcesAssembler;
+	private PagedResourcesAssembler<@NonNull ProductModel> pagedResourcesAssembler;
 
 	public ProductController(ProductRepository productRepository) {
 		this.productRepository = productRepository;
@@ -35,12 +35,22 @@ public class ProductController {
 	public ResponseEntity<PagedModel<EntityModel<ProductModel>>> getAllProducts(
 			Pageable pageable, PagedResourcesAssembler<ProductModel> assembler
 	) {
+//		Page<ProductModel> productsPage = productRepository.findAllByOrderByNameAsc(pageable);
+//		PagedModel<EntityModel<ProductModel>> pagedModel = assembler.toModel(productsPage, product -> {
+//			return EntityModel.of(product,
+//					linkTo(methodOn(ProductController.class).getOneProduct(product.getIdProduct())).withSelfRel());
+//		});
+
 		Page<ProductModel> productsPage = productRepository.findAllByOrderByNameAsc(pageable);
-		PagedModel<EntityModel<ProductModel>> pagedModel = assembler.toModel(productsPage, product -> {
-			return EntityModel.of(product,
-					linkTo(methodOn(ProductController.class).getOneProduct(product.getIdProduct())).withSelfRel());
-		});
+		PagedModel<EntityModel<ProductModel>> pagedModel =
+				assembler.toModel(productsPage, ProductController::toModel);
+		
 		return ResponseEntity.ok(pagedModel);
+	}
+
+	private static EntityModel<ProductModel> toModel(ProductModel product) {
+		return EntityModel.of(product,
+				linkTo(methodOn(ProductController.class).getOneProduct(product.getIdProduct())).withSelfRel());
 	}
 
 	@GetMapping("/products/{id}")
