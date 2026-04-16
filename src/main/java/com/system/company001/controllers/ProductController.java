@@ -65,7 +65,7 @@ public class ProductController {
 		return productRepository.findById(id)
 				.map(product -> {
 					product.add(linkTo(methodOn(ProductController.class).getAllProducts(
-							null, pagedResourcesAssembler))
+							null, this.pagedResourcesAssembler))
 							.withRel("Products List"));
 					return ResponseEntity.status(HttpStatus.OK).body((Object) product);
 				})

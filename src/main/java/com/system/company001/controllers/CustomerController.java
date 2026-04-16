@@ -56,7 +56,7 @@ public class CustomerController {
 		return customerRepository.findById(id)
 				.map(customer -> {
 					customer.add(linkTo(methodOn(CustomerController.class).getAllCustomers(
-							null, pagedResourcesAssembler))
+							null, this.pagedResourcesAssembler))
 							.withRel("Customers List"));
 					return ResponseEntity.status(HttpStatus.OK).body((Object) customer);
 				})
