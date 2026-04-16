@@ -5,6 +5,7 @@ import com.system.company001.models.CustomerModel;
 import com.system.company001.repositories.CustomerRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -21,12 +22,15 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 public class CustomerController {
 
-	final CustomerRepository customerRepository;
+	private final CustomerRepository customerRepository;
 
-	private PagedResourcesAssembler<CustomerModel> pagedResourcesAssembler;
+	private final PagedResourcesAssembler<CustomerModel> pagedResourcesAssembler;
 
-	public CustomerController(CustomerRepository customerRepository) {
+	@Autowired
+	public CustomerController(CustomerRepository customerRepository,
+	                          PagedResourcesAssembler<CustomerModel> pagedResourcesAssembler) {
 		this.customerRepository = customerRepository;
+		this.pagedResourcesAssembler = pagedResourcesAssembler;
 	}
 
 	@GetMapping("/customers")

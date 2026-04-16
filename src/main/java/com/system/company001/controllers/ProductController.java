@@ -4,8 +4,8 @@ import com.system.company001.dtos.ProductRecordDto;
 import com.system.company001.models.ProductModel;
 import com.system.company001.repositories.ProductRepository;
 import jakarta.validation.Valid;
-import org.jspecify.annotations.NonNull;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -23,12 +23,19 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 public class ProductController {
 
-	final ProductRepository productRepository;
+	private final ProductRepository productRepository;
 
-	private PagedResourcesAssembler<@NonNull ProductModel> pagedResourcesAssembler;
+	private final PagedResourcesAssembler<ProductModel> pagedResourcesAssembler;
 
-	public ProductController(ProductRepository productRepository) {
+//	public ProductController(ProductRepository productRepository) {
+//		this.productRepository = productRepository;
+//	}
+
+	@Autowired
+	public ProductController(ProductRepository productRepository,
+	                         PagedResourcesAssembler<ProductModel> pagedResourcesAssembler) {
 		this.productRepository = productRepository;
+		this.pagedResourcesAssembler = pagedResourcesAssembler;
 	}
 
 	@GetMapping("/products")
