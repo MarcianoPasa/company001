@@ -21,3 +21,5 @@ spring:
     error:
       include-message: always
       include-stacktrace: always
+  main:
+    allow-bean-definition-overriding: true
