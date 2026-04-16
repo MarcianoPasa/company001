@@ -1,24 +1,26 @@
 # Estágio 1: Build
-FROM bellsoft/liberica-openjdk-debian:25 AS build
+FROM eclipse-temurin:25-jdk-alpine AS build
 WORKDIR /app
 
-# Instala o Maven para garantir a compilação
-RUN apt-get update && apt-get install -y maven
+# Copia os arquivos do Maven (pom.xml) e baixa as dependências (cache)
+COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw .
+RUN ./mvnw dependency:go-offline
 
-# Copia o código fonte
-COPY . .
+# Copia o código fonte e gera o JAR
+COPY src ./src
+RUN ./mvnw clean package -DskipTests
 
-# Gera o arquivo .jar ignorando os testes (para agilizar o deploy no Jenkins)
-RUN mvn clean package -DskipTests
-
-# Estágio 2: Runtime
-FROM bellsoft/liberica-openjdk-debian:25
+# Estágio 2: Runtime (Imagem final mais leve)
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
-# Copia o jar gerado no estágio anterior
+# Copia apenas o JAR gerado no estágio anterior
 COPY --from=build /app/target/*.jar app.jar
 
-# Define variáveis de ambiente para o Spring (ou você pode passar no comando de run)
-EXPOSE 8080
+# Expõe a porta configurada no seu yaml
+EXPOSE 8081
 
+# Executa a aplicação
 ENTRYPOINT ["java", "-jar", "app.jar"]

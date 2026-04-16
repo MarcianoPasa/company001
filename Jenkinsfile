@@ -2,62 +2,49 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "company001-backend"
-        CONTAINER_NAME = "company001-backend"
-        PORT = "3000"
+        DOCKER_IMAGE = "dradmin/company001-backend:latest"
+        CONTAINER_NAME = "company001-backend-container"
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main', url: 'https://github.com/MarcianoPasa/company001.git'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Docker Build') {
+            steps {
+                echo 'Iniciando o Build da Imagem Docker...'
+                bat "docker build -t ${DOCKER_IMAGE} ."
+            }
+        }
+
+        stage('Stop Old Container') {
             steps {
                 script {
-                    if (isUnix()) {
-                        sh "docker build -t ${IMAGE_NAME} ."
-                    } else {
-                        bat "docker build -t ${IMAGE_NAME} ."
-                    }
+                    // Para e remove o container antigo se ele existir para evitar conflito de porta
+                    bat "docker stop ${CONTAINER_NAME} || ver > nul"
+                    bat "docker rm ${CONTAINER_NAME} || ver > nul"
                 }
             }
         }
 
-        stage('Stop old container') {
+        stage('Deploy (Docker Run)') {
             steps {
-                script {
-                    if (isUnix()) {
-                        sh "docker rm -f ${CONTAINER_NAME} || true"
-                    } else {
-                        bat "docker rm -f ${CONTAINER_NAME} || exit 0"
-                    }
-                }
-            }
-        }
-
-        stage('Run Container') {
-            steps {
-                script {
-                    if (isUnix()) {
-                        sh "docker run -d --name ${CONTAINER_NAME} -p 8081:8080 ${IMAGE_NAME}"
-                    } else {
-                        bat "docker run -d --name ${CONTAINER_NAME} -p 8081:8080 ${IMAGE_NAME}"
-                    }
-                }
+                echo 'Subindo o novo container...'
+                // Rodando em modo detached (-d) e mapeando a porta 8081
+                bat "docker run -d --name ${CONTAINER_NAME} -p 8081:8081 ${DOCKER_IMAGE}"
             }
         }
     }
 
     post {
         success {
-            echo "✔ Backend rodando com sucesso!"
+            echo 'Deployment concluído com sucesso!'
         }
         failure {
-            echo "❌ Falha no build/deploy"
+            echo 'Falha no processo de CI/CD. Verifique os logs.'
         }
     }
 }
