@@ -28,10 +28,6 @@ public class ProductController {
 
 	private final PagedResourcesAssembler<ProductModel> pagedResourcesAssembler;
 
-//	public ProductController(ProductRepository productRepository) {
-//		this.productRepository = productRepository;
-//	}
-
 	@Autowired
 	public ProductController(ProductRepository productRepository,
 	                         @Lazy PagedResourcesAssembler<ProductModel> pagedResourcesAssembler) {
@@ -43,16 +39,9 @@ public class ProductController {
 	public ResponseEntity<PagedModel<EntityModel<ProductModel>>> getAllProducts(
 			Pageable pageable, PagedResourcesAssembler<ProductModel> assembler
 	) {
-//		Page<ProductModel> productsPage = productRepository.findAllByOrderByNameAsc(pageable);
-//		PagedModel<EntityModel<ProductModel>> pagedModel = assembler.toModel(productsPage, product -> {
-//			return EntityModel.of(product,
-//					linkTo(methodOn(ProductController.class).getOneProduct(product.getIdProduct())).withSelfRel());
-//		});
-
 		Page<ProductModel> productsPage = productRepository.findAllByOrderByNameAsc(pageable);
 		PagedModel<EntityModel<ProductModel>> pagedModel =
 				assembler.toModel(productsPage, ProductController::toModel);
-		
 		return ResponseEntity.ok(pagedModel);
 	}
 

@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -38,13 +39,10 @@ public class CustomerController {
 	public ResponseEntity<PagedModel<EntityModel<CustomerModel>>> getAllCustomers(
 			Pageable pageable, PagedResourcesAssembler<CustomerModel> assembler
 	) {
-//		Page<CustomerModel> customersPage = customerRepository.findAllByOrderByBusinessNameAsc(pageable);
-//		PagedModel<EntityModel<CustomerModel>> pagedModel =
-//				assembler.toModel(customersPage, CustomerController::toModel);
-		return ResponseEntity.ok(assembler.toModel(
-				customerRepository.findAllByOrderByBusinessNameAsc(pageable),
-				CustomerController::toModel)
-		);
+		Page<CustomerModel> customersPage = customerRepository.findAllByOrderByBusinessNameAsc(pageable);
+		PagedModel<EntityModel<CustomerModel>> pagedModel =
+				assembler.toModel(customersPage, CustomerController::toModel);
+		return ResponseEntity.ok(pagedModel);
 	}
 
 	private static EntityModel<CustomerModel> toModel(CustomerModel customer) {
