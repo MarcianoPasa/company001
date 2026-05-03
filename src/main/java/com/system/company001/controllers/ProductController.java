@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Base64;
 import java.util.UUID;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -85,7 +86,13 @@ public class ProductController {
 	) {
 		return productRepository.findById(id)
 				.map(product -> {
-					BeanUtils.copyProperties(productRecordDto, product);
+					BeanUtils.copyProperties(productRecordDto, product, "image");
+					if (productRecordDto.image() != null) {
+						String base64Image = productRecordDto.image().contains(",")
+								? productRecordDto.image().split(",")[1]
+								: productRecordDto.image();
+						product.setImage(Base64.getDecoder().decode(base64Image));
+					}
 					return ResponseEntity.status(HttpStatus.OK).body((Object) productRepository.save(product));
 				})
 				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found."));

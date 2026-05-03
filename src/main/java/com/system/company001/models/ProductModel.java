@@ -1,13 +1,15 @@
 package com.system.company001.models;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.type.descriptor.jdbc.VarbinaryJdbcType;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.UUID;
-
+import jakarta.persistence.Lob;
 
 @Entity
 @Table(name = "TB_PRODUCTS")
@@ -21,6 +23,10 @@ public class ProductModel extends RepresentationModel<ProductModel> implements S
 	private UUID idProduct;
 	private String name;
 	private BigDecimal value;
+	@Lob
+	@JdbcType(VarbinaryJdbcType.class)
+	@Column(name = "image", columnDefinition = "bytea")
+	private byte[] image;
 
 	public UUID getIdProduct() {
 		return idProduct;
@@ -44,5 +50,13 @@ public class ProductModel extends RepresentationModel<ProductModel> implements S
 
 	public void setValue(BigDecimal value) {
 		this.value = value;
+	}
+
+	public byte[] getImage() {
+		return image;
+	}
+
+	public void setImage(byte[] image) {
+		this.image = image;
 	}
 }
