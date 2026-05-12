@@ -24,6 +24,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 public class CustomerController {
 
+	private static final String CLIENTE_NAO_ENCONTRADO = "Cliente não encontrado.";
+
 	private final CustomerRepository customerRepository;
 
 	private final PagedResourcesAssembler<CustomerModel> pagedResourcesAssembler;
@@ -59,7 +61,7 @@ public class CustomerController {
 							.withRel("Customers List"));
 					return ResponseEntity.status(HttpStatus.OK).body((Object) customer);
 				})
-				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found."));
+				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(CLIENTE_NAO_ENCONTRADO));
 	}
 
 	@PostMapping("/customers")
@@ -73,9 +75,9 @@ public class CustomerController {
 		return customerRepository.findById(id)
 				.map(customer -> {
 					customerRepository.delete(customer);
-					return ResponseEntity.status(HttpStatus.OK).body((Object) "Customer deleted successfully.");
+					return ResponseEntity.status(HttpStatus.OK).body((Object) "Cliente apagado com sucesso.");
 				})
-				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found."));
+				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(CLIENTE_NAO_ENCONTRADO));
 	}
 
 	@PutMapping("/customers/{id}")

@@ -3,7 +3,6 @@ server:
 
 spring:
   datasource:
-    # Correto para o Docker acessar o banco no seu Windows
     url: jdbc:postgresql://host.docker.internal:5432/company001
     username: postgres
     password: 123
@@ -27,3 +26,10 @@ spring:
       include-stacktrace: always
   main:
     allow-bean-definition-overriding: true
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+  Jackson:
+    serialization:
+      indent_output: true

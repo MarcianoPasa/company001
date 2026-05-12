@@ -11,8 +11,8 @@ public record CustomerRecordDto(
         @NotNull String businessTaxId
 ) {
     public CustomerModel convertToCustomerModel() {
-        var CustomerModel = new CustomerModel();
-        BeanUtils.copyProperties(this, CustomerModel);
-        return CustomerModel;
+        var customerModel = new CustomerModel();
+        BeanUtils.copyProperties(this, customerModel);
+        return customerModel;
     }
 }

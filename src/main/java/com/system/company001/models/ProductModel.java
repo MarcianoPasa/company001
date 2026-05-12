@@ -9,7 +9,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.UUID;
-import jakarta.persistence.Lob;
 
 @Entity
 @Table(name = "TB_PRODUCTS")
@@ -27,6 +26,10 @@ public class ProductModel extends RepresentationModel<ProductModel> implements S
 	@JdbcType(VarbinaryJdbcType.class)
 	@Column(name = "image", columnDefinition = "bytea")
 	private byte[] image;
+	@Lob
+	@JdbcType(VarbinaryJdbcType.class)
+	@Column(name = "thumbnail", columnDefinition = "bytea")
+	private byte[] thumbnail;
 
 	public UUID getIdProduct() {
 		return idProduct;
@@ -58,5 +61,13 @@ public class ProductModel extends RepresentationModel<ProductModel> implements S
 
 	public void setImage(byte[] image) {
 		this.image = image;
+	}
+
+	public byte[] getThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(byte[] thumbnail) {
+		this.thumbnail = thumbnail;
 	}
 }
