@@ -21,7 +21,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping("/products")
 public class ProductController {
 
 	private final ProductService productService;
@@ -30,11 +29,14 @@ public class ProductController {
 		this.productService = productService;
 	}
 
-	@GetMapping
+	@GetMapping("/products")
 	public ResponseEntity<PagedModel<EntityModel<ProductListRecordDto>>> getAllProducts(
 			Pageable pageable,
 			PagedResourcesAssembler<ProductListRecordDto> assembler) {
 		Page<ProductListRecordDto> productsPage = productService.getAllProducts(pageable);
+		if (productsPage.isEmpty()) {
+			ResponseEntity.status(HttpStatus.NOT_FOUND).body("Produto não encontrado.");
+		}
 		PagedModel<EntityModel<ProductListRecordDto>> pagedModel = assembler.toModel(productsPage,
 				productDto -> EntityModel.of(productDto,
 						linkTo(methodOn(ProductController.class).getOneProduct(productDto.idProduct())).withSelfRel()
@@ -43,18 +45,14 @@ public class ProductController {
 		return ResponseEntity.ok(pagedModel);
 	}
 
-	@GetMapping("/{id}")
+	@GetMapping("/products/{id}")
 	public ResponseEntity<Object> getOneProduct(@PathVariable(value="id") UUID id) {
 		return productService.getOneProduct(id)
-				.map(product -> {
-					product.add(linkTo(methodOn(ProductController.class)
-							.getAllProducts(null, null)).withRel("productList"));
-					return ResponseEntity.ok((Object) product);
-				})
+				.map(product -> ResponseEntity.ok((Object) product))
 				.orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Produto não encontrado."));
 	}
 
-	@PostMapping
+	@PostMapping("/products")
 	public ResponseEntity<ProductModel> saveProduct(@RequestBody @Valid ProductRecordDto productRecordDto) {
 		ProductModel savedProduct = productService.save(productRecordDto);
 		URI location = linkTo(methodOn(ProductController.class)
@@ -62,7 +60,7 @@ public class ProductController {
 		return ResponseEntity.created(location).body(savedProduct);
 	}
 
-	@PutMapping("/{id}")
+	@PutMapping("/products/{id}")
 	public ResponseEntity<ProductModel> updateProduct(
 			@PathVariable UUID id,
 			@RequestBody @Valid ProductRecordDto productRecordDto
@@ -72,7 +70,7 @@ public class ProductController {
 				.orElse(ResponseEntity.notFound().build());
 	}
 
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/products/{id}")
 	public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
 		return productService.deleteProduct(id)
 				? ResponseEntity.noContent().build()

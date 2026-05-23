@@ -33,11 +33,11 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Page<ProductListRecordDto> getAllProducts(Pageable pageable) {
-        return productRepository.findAllProductListRecordDto(pageable);
+        return productRepository.findAllProductsListRecordDto(pageable);
     }
 
-    public Optional<ProductModel> getOneProduct(UUID id) {
-        return productRepository.findById(id);
+    public Optional<ProductListRecordDto> getOneProduct(UUID id) {
+        return productRepository.findProductByIdRecordDto(id);
     }
 
     @Transactional
