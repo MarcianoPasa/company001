@@ -3,7 +3,6 @@ package com.system.company001.models;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.type.descriptor.jdbc.VarbinaryJdbcType;
-import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -12,7 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "TB_PRODUCTS")
-public class ProductModel extends RepresentationModel<ProductModel> implements Serializable {
+public class ProductModel implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -20,12 +19,16 @@ public class ProductModel extends RepresentationModel<ProductModel> implements S
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private UUID idProduct;
+
 	private String name;
+
 	private BigDecimal value;
+
 	@Lob
 	@JdbcType(VarbinaryJdbcType.class)
 	@Column(name = "image", columnDefinition = "bytea")
 	private byte[] image;
+
 	@Lob
 	@JdbcType(VarbinaryJdbcType.class)
 	@Column(name = "thumbnail", columnDefinition = "bytea")
@@ -69,5 +72,23 @@ public class ProductModel extends RepresentationModel<ProductModel> implements S
 
 	public void setThumbnail(byte[] thumbnail) {
 		this.thumbnail = thumbnail;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+
+		if (!(o instanceof ProductModel other)) {
+			return false;
+		}
+
+		return idProduct != null && idProduct.equals(other.getIdProduct());
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
 	}
 }

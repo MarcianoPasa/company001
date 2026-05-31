@@ -1,8 +1,8 @@
 package com.system.company001.controllers;
 
-import com.system.company001.dtos.ProductListRecordDto;
+import com.system.company001.dtos.ProductImageRecordDto;
+import com.system.company001.dtos.ProductListResponseDto;
 import com.system.company001.dtos.ProductRecordDto;
-import com.system.company001.models.ProductModel;
 import com.system.company001.services.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,44 +29,53 @@ public class ProductController {
 	}
 
 	@GetMapping("/products")
-	public ResponseEntity<PagedModel<EntityModel<ProductListRecordDto>>> getAllProducts(
+	public ResponseEntity<PagedModel<EntityModel<ProductListResponseDto>>> getAllProducts(
 			Pageable pageable,
-			PagedResourcesAssembler<ProductListRecordDto> assembler) {
-		Page<ProductListRecordDto> productsPage = productService.getAllProducts(pageable);
-		if (productsPage.isEmpty()) {
-			ResponseEntity.status(HttpStatus.NOT_FOUND).body("Produto não encontrado.");
-		}
-		PagedModel<EntityModel<ProductListRecordDto>> pagedModel = assembler.toModel(productsPage,
+			PagedResourcesAssembler<ProductListResponseDto> assembler
+	) {
+		Page<ProductListResponseDto> productsPage = productService.getAllProducts(pageable);
+
+		PagedModel<EntityModel<ProductListResponseDto>> pagedModel = assembler.toModel(productsPage,
 				productDto -> EntityModel.of(productDto,
 						linkTo(methodOn(ProductController.class).getOneProduct(productDto.idProduct())).withSelfRel()
 				)
 		);
+
 		return ResponseEntity.ok(pagedModel);
 	}
 
 	@GetMapping("/products/{id}")
-	public ResponseEntity<Object> getOneProduct(@PathVariable(value="id") UUID id) {
+	public ResponseEntity<EntityModel<ProductRecordDto>> getOneProduct(@PathVariable UUID id) {
 		return productService.getOneProduct(id)
-				.map(product -> ResponseEntity.ok((Object) product))
-				.orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Produto não encontrado."));
+				.map(dto -> {
+					EntityModel<ProductRecordDto> entityModel = EntityModel.of(dto,
+							linkTo(methodOn(ProductController.class).getOneProduct(id)).withSelfRel(),
+							linkTo(methodOn(ProductController.class).getAllProducts(
+									null, null)).withRel("productsList")
+					);
+					return ResponseEntity.ok(entityModel);
+				})
+				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	@PostMapping("/products")
-	public ResponseEntity<ProductModel> saveProduct(@RequestBody @Valid ProductRecordDto productRecordDto) {
-		ProductModel savedProduct = productService.save(productRecordDto);
+	public ResponseEntity<ProductRecordDto> saveProduct(
+			@RequestBody @Valid ProductImageRecordDto productImageRecordDto
+	) {
+		ProductRecordDto savedProductDto = productService.save(productImageRecordDto);
 		URI location = linkTo(methodOn(ProductController.class)
-				.getOneProduct(savedProduct.getIdProduct())).toUri();
-		return ResponseEntity.created(location).body(savedProduct);
+				.getOneProduct(savedProductDto.idProduct())).toUri();
+		return ResponseEntity.created(location).body(savedProductDto);
 	}
 
 	@PutMapping("/products/{id}")
-	public ResponseEntity<ProductModel> updateProduct(
+	public ResponseEntity<ProductRecordDto> updateProduct(
 			@PathVariable UUID id,
-			@RequestBody @Valid ProductRecordDto productRecordDto
+			@RequestBody @Valid ProductImageRecordDto productImageRecordDto
 	) {
-		return productService.update(id, productRecordDto)
+		return productService.update(id, productImageRecordDto)
 				.map(ResponseEntity::ok)
-				.orElse(ResponseEntity.notFound().build());
+				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	@DeleteMapping("/products/{id}")

@@ -1,6 +1,7 @@
 package com.system.company001.services;
 
-import com.system.company001.dtos.ProductListRecordDto;
+import com.system.company001.dtos.ProductImageRecordDto;
+import com.system.company001.dtos.ProductListResponseDto;
 import com.system.company001.dtos.ProductRecordDto;
 import com.system.company001.models.ProductModel;
 import com.system.company001.repositories.ProductRepository;
@@ -32,23 +33,30 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductListRecordDto> getAllProducts(Pageable pageable) {
+    public Page<ProductListResponseDto> getAllProducts(Pageable pageable) {
         return productRepository.findAllProductsListRecordDto(pageable);
     }
 
-    public Optional<ProductListRecordDto> getOneProduct(UUID id) {
-        return productRepository.findProductByIdRecordDto(id);
+    @Transactional(readOnly = true)
+    public Optional<ProductRecordDto> getOneProduct(UUID id) {
+        return productRepository.findById(id)
+                .map(this::convertProductModelToProductRecordDto);
     }
 
     @Transactional
-    public ProductModel save(ProductRecordDto dto) {
-        var product = dto.convertToProductModel();
+    public ProductRecordDto save(ProductImageRecordDto dto) {
+        ProductModel product = new ProductModel();
+        product.setName(dto.name());
+        product.setValue(dto.value());
         processImages(dto.image(), product);
-        return productRepository.save(product);
+
+        ProductModel savedProduct = productRepository.save(product);
+
+        return convertProductModelToProductRecordDto(savedProduct);
     }
 
     @Transactional
-    public Optional<ProductModel> update(UUID id, ProductRecordDto dto) {
+    public Optional<ProductRecordDto> update(UUID id, ProductImageRecordDto dto) {
         return productRepository.findById(id).map(product -> {
             product.setName(dto.name());
             product.setValue(dto.value());
@@ -62,20 +70,23 @@ public class ProductService {
                 product.setThumbnail(null);
             }
 
-            return productRepository.save(product);
+            ProductModel updatedProduct = productRepository.save(product);
+
+            return convertProductModelToProductRecordDto(updatedProduct);
         });
     }
 
     @Transactional
     public boolean deleteProduct(UUID id) {
-        if (productRepository.existsById(id)) {
-            productRepository.deleteById(id);
-            return true;
-        }
-        return false;
+        return productRepository.findById(id)
+                .map(product -> {
+                    productRepository.delete(product);
+                    return true;
+                })
+                .orElse(false);
     }
 
-    public boolean isImageSame(ProductModel model, ProductRecordDto dto) {
+    public boolean isImageSame(ProductModel model, ProductImageRecordDto dto) {
         if (model.getImage() == null && dto.image() == null) {
             return true;
         }
@@ -118,5 +129,19 @@ public class ProductService {
             LOGGER.log(Level.SEVERE, "Erro ao gerar thumbnail: ", e);
             return new ByteArrayOutputStream().toByteArray();
         }
+    }
+
+    private ProductRecordDto convertProductModelToProductRecordDto(ProductModel productModel) {
+        return new ProductRecordDto(
+                productModel.getIdProduct(),
+                productModel.getName(),
+                productModel.getValue(),
+                productModel.getImage() != null
+                        ? Base64.getEncoder().encodeToString(productModel.getImage())
+                        : null,
+                productModel.getThumbnail() != null
+                        ? Base64.getEncoder().encodeToString(productModel.getThumbnail())
+                        : null
+        );
     }
 }
