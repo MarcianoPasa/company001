@@ -90,9 +90,6 @@ public class ProductService {
         if (model.getImage() == null && dto.image() == null) {
             return true;
         }
-        if (model.getImage() == null || dto.image() == null) {
-            return false;
-        }
         try {
             String base64Data = dto.image().contains(",") ? dto.image().split(",")[1] : dto.image();
             byte[] dtoBytes = Base64.getDecoder().decode(base64Data);
@@ -121,7 +118,7 @@ public class ProductService {
              ByteArrayInputStream inputStream = new ByteArrayInputStream(originalImage)
         ) {
             Thumbnails.of(inputStream)
-                    .size(150, 150)
+                    .size(300, 300)
                     .outputFormat("png")
                     .toOutputStream(outputStream);
             return outputStream.toByteArray();
