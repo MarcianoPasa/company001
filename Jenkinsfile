@@ -32,11 +32,22 @@ pipeline {
 
         stage('Deploy (Docker Run)') {
             steps {
-                echo 'Subindo o novo container...'
-                // Rodando em modo detached (-d) e mapeando a porta 8081
-                bat "docker run -d --name ${CONTAINER_NAME} -p 8081:8081 ${DOCKER_IMAGE}"
+                echo 'Iniciando o container da aplicação...'
+                bat """
+                    docker run -d --name company001-backend -p 8081:8081 ^
+                    -e SPRING_DATASOURCE_URL="jdbc:postgresql://host.docker.internal:5432/company001" ^
+                    dradmin/company001-backend:latest
+                """
             }
         }
+
+//        stage('Deploy (Docker Run)') {
+//            steps {
+//                echo 'Subindo o novo container...'
+//                // Rodando em modo detached (-d) e mapeando a porta 8081
+//                bat "docker run -d --name ${CONTAINER_NAME} -p 8081:8081 ${DOCKER_IMAGE}"
+//            }
+//        }
     }
 
     post {
