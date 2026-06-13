@@ -1,10 +1,9 @@
 package com.system.company001.controllers;
 
-import com.system.company001.dtos.ProductImageRecordDto;
-import com.system.company001.dtos.ProductListResponseDto;
-import com.system.company001.dtos.ProductRecordDto;
+import com.system.company001.dtos.*;
 import com.system.company001.services.ProductService;
 import jakarta.validation.Valid;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -23,15 +22,17 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class ProductController {
 
 	private final ProductService productService;
+	private final PagedResourcesAssembler<ProductListResponseDto> assembler;
 
-	public ProductController(ProductService productService) {
+	public ProductController(ProductService productService, PagedResourcesAssembler<ProductListResponseDto> assembler) {
 		this.productService = productService;
-	}
+        this.assembler = assembler;
+    }
 
 	@GetMapping("/products")
 	public ResponseEntity<PagedModel<EntityModel<ProductListResponseDto>>> getAllProducts(
 			Pageable pageable,
-			PagedResourcesAssembler<ProductListResponseDto> assembler
+			@NonNull PagedResourcesAssembler<ProductListResponseDto> assembler
 	) {
 		Page<ProductListResponseDto> productsPage = productService.getAllProducts(pageable);
 
@@ -45,13 +46,13 @@ public class ProductController {
 	}
 
 	@GetMapping("/products/{id}")
-	public ResponseEntity<EntityModel<ProductRecordDto>> getOneProduct(@PathVariable UUID id) {
+	public ResponseEntity<EntityModel<ProductLoadRecordDto>> getOneProduct(@PathVariable UUID id) {
 		return productService.getOneProduct(id)
 				.map(dto -> {
-					EntityModel<ProductRecordDto> entityModel = EntityModel.of(dto,
+					EntityModel<ProductLoadRecordDto> entityModel = EntityModel.of(dto,
 							linkTo(methodOn(ProductController.class).getOneProduct(id)).withSelfRel(),
 							linkTo(methodOn(ProductController.class).getAllProducts(
-									null, null)).withRel("productsList")
+									null, assembler)).withRel("productsLoad")
 					);
 					return ResponseEntity.ok(entityModel);
 				})
@@ -84,4 +85,11 @@ public class ProductController {
 				? ResponseEntity.noContent().build()
 				: ResponseEntity.notFound().build();
 	}
+
+    @GetMapping("/products/image/{id}")
+    public ResponseEntity<ProductImageDto> getImageFullByIdProduct(@PathVariable UUID id) {
+        return productService.getImageFullByIdProduct(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 }

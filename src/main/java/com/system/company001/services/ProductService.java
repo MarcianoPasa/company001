@@ -1,8 +1,6 @@
 package com.system.company001.services;
 
-import com.system.company001.dtos.ProductImageRecordDto;
-import com.system.company001.dtos.ProductListResponseDto;
-import com.system.company001.dtos.ProductRecordDto;
+import com.system.company001.dtos.*;
 import com.system.company001.models.ProductModel;
 import com.system.company001.repositories.ProductRepository;
 import net.coobird.thumbnailator.Thumbnails;
@@ -14,8 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -38,9 +38,13 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<ProductRecordDto> getOneProduct(UUID id) {
-        return productRepository.findById(id)
-                .map(this::convertProductModelToProductRecordDto);
+    public Optional<ProductLoadRecordDto> getOneProduct(UUID id) {
+        return productRepository.findProductByIdRecordDto(id);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<ProductImageDto> getImageFullByIdProduct(UUID id) {
+        return productRepository.findImageByIdProduct(id);
     }
 
     @Transactional
@@ -101,6 +105,8 @@ public class ProductService {
 
     private void processImages(String base64Image, ProductModel model) {
         if (base64Image == null || base64Image.isEmpty()) {
+            model.setImage(null);
+            model.setThumbnail(null);
             return;
         }
         try {
@@ -124,7 +130,7 @@ public class ProductService {
             return outputStream.toByteArray();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Erro ao gerar thumbnail: ", e);
-            return new ByteArrayOutputStream().toByteArray();
+            return new byte[0];
         }
     }
 

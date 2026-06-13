@@ -5,34 +5,31 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
-public record ProductListResponseDto(
+public record ProductLoadRecordDto(
         UUID idProduct,
         String name,
         BigDecimal value,
-        byte[] image,
         byte[] thumbnail
 ) {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        ProductListResponseDto that = (ProductListResponseDto) o;
-        return Objects.equals(name, that.name) && Objects.deepEquals(image, that.image) &&
-                Objects.equals(idProduct, that.idProduct) &&
+        ProductLoadRecordDto that = (ProductLoadRecordDto) o;
+        return Objects.equals(name, that.name) && Objects.equals(idProduct, that.idProduct) &&
                 Objects.equals(value, that.value) && Objects.deepEquals(thumbnail, that.thumbnail);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idProduct, name, value, Arrays.hashCode(image), Arrays.hashCode(thumbnail));
+        return Objects.hash(idProduct, name, value, Arrays.hashCode(thumbnail));
     }
 
     @Override
     public String toString() {
-        return "ProductListResponseDto{" +
+        return "ProductLoadRecordDto{" +
                 "idProduct=" + idProduct +
                 ", name='" + name + '\'' +
                 ", value=" + value +
-                ", image=" + Arrays.toString(image) +
                 ", thumbnail=" + Arrays.toString(thumbnail) +
                 '}';
     }
